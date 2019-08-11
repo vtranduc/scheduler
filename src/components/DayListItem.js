@@ -12,10 +12,11 @@ export default function DayListItem(props) {
     <div
       className={buttonClass}
       onClick={() => {
-        props.setDay(props.name);
-        console.log('I changed to props.name')
-        console.log(props.name)
-    }}>
+        props.setDay();
+        console.log("I changed to props.name");
+        console.log(props.name);
+      }}
+    >
       <div>
         <h1>{props.name}</h1>
       </div>
