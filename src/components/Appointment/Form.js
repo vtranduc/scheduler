@@ -3,12 +3,8 @@ import Button from "../../components/Button";
 import InterviewerList from "../../components/InterviewerList";
 
 export default function Form(props) {
-  const arr = [1, 2, 3, 4, 5];
-
   const [name, setName] = useState(props.name);
   const [interviewer, setInterviewer] = useState(props.interviewerId);
-
-  console.log("pnada", props.interviewer);
 
   return (
     <main className="appointment__card appointment__card--create">
