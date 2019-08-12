@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "components/Appointment/styles.scss";
 import Header from "components/Appointment/header";
 import Empty from "components/Appointment/Empty";
@@ -28,56 +28,49 @@ const EMPTY = "EMPTY";
 const SHOW = "SHOW";
 const CREATE = "CREATE";
 const SAVING = "SAVING";
+const DELETING = "DELETING";
+const CONFIRM = "CONFIRM";
+const ERROR_SAVE = "ERROR_SAVE";
+const ERROR_DELETE = "ERROR_DELETE";
 
 ///////////////////////////////////////////////////////
 
 export default function Appointment(props) {
   const modeTracker = useVisualMode(props.interview ? SHOW : EMPTY);
-
-  const save = function(bookInterview, name, interviewer, time) {
+  const save = function(name, interviewer, time) {
     if (name === "" || !interviewer) {
-      console.log("INVALID INPUT", name, interviewer);
+      console.log("invalid input");
       return;
     }
-    console.log("ALADEEN");
     const interview = { student: name, interviewer: interviewer };
-    console.log("new id is ", props.getNextId());
-
-    let nextId = props.getNextId();
-
     const interviewInfo = {
-      id: props.id, //FIIIIIIIIIIIIIIXXXXXX
+      id: props.id,
       time: time,
       interview: interview
     };
-
-    // console.log(interviewInfo);
-    // console.log(interviewInfo.interview);
-    // useEffect(() => {
-    //   bookInterview(props.getNextId(), interviewInfo);
-    //   modeTracker.transition(EMPTY);
-    // });
-
-    bookInterview(props.id, interviewInfo)
-      .then(() => {
+    modeTracker.transition(SAVING);
+    props
+      .bookInterview(props.id, interviewInfo)
+      .then(res => {
         console.log("GOOD STYFF");
+        modeTracker.transition(SHOW);
       })
       .catch(err => {
-        console.log("FAILED HERE");
+        console.log("Failed to modify api: ", err);
+        modeTracker.transition(ERROR_SAVE);
       });
+  };
 
-    console.log("WHAT HAPPENED????");
-
-    modeTracker.transition(SAVING);
-
-    setTimeout(() => {
-      console.log("ONIZUKA", props.state);
-      console.log("I actually have an id???", props.id);
-
-      modeTracker.transition(SHOW);
-    }, 3000);
-
-    // return;
+  const deleteInterview = function() {
+    modeTracker.transition(DELETING);
+    props
+      .deleteInterview(props.id, props.time)
+      .then(res => {
+        modeTracker.transition(EMPTY);
+      })
+      .catch(err => {
+        modeTracker.transition(ERROR_DELETE);
+      });
   };
 
   return (
@@ -98,35 +91,63 @@ export default function Appointment(props) {
           interviewer={props.interview.interviewer}
           onEdit={() => {
             console.log("Edit something here");
+            modeTracker.transition(CREATE);
           }}
           onDelete={() => {
             console.log("Delete this part");
+            modeTracker.transition(CONFIRM);
           }}
         />
       )}
       {modeTracker.mode === CREATE && (
         <Form
-          name={""}
+          name={props.interview ? props.interview.student : ""}
+          interviewerId={
+            props.interview ? props.interview.interviewer.id : null
+          }
           interviewers={props.interviewers}
-          interviewer={null}
           onSave={(name, interviewer) => {
-            console.log("saving");
-            console.log(name);
-            console.log(interviewer);
-            console.log(props.time);
-
-            // save = function(bookInterview, name, interviewer, time
-            console.log("ENTERING SAVE FUNCTION");
-            save(props.bookInterview, name, interviewer, props.time);
+            save(name, interviewer, props.time);
           }}
           onCancel={() => {
-            // console.log("cancel");
+            console.log("Current united state: ", props.state);
             modeTracker.back();
           }}
-          // modeTracker={modeTracker}
         />
       )}
       {modeTracker.mode === SAVING && <Status message={"SAVING"} />}
+      {modeTracker.mode === DELETING && <Status message={"DELETING"} />}
+      {modeTracker.mode === CONFIRM && (
+        <Confirm
+          onConfirm={() => {
+            console.log("Confirm button has been clicked!");
+            deleteInterview();
+          }}
+          onCancel={() => {
+            console.log("CANCEL ANCHEN");
+            modeTracker.transition(SHOW);
+          }}
+          message={"Are you sure you would like to delete?"}
+        />
+      )}
+      {modeTracker.mode === ERROR_SAVE && (
+        <Error
+          message={"Could not save appointment"}
+          onClose={() => {
+            console.log("closing something");
+            modeTracker.back();
+          }}
+        />
+      )}
+      {modeTracker.mode === ERROR_DELETE && (
+        <Error
+          message={"Could not cancel appointment."}
+          onClose={() => {
+            console.log("supposed to go back at Error_delete");
+            modeTracker.back();
+          }}
+        />
+      )}
     </div>
   );
 

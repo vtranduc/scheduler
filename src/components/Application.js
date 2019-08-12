@@ -80,57 +80,39 @@ export default function Application(props) {
   ////////////////////////////////////
 
   const bookInterview = function(id, interview) {
-    console.log("TIME TO BOOK INTERVIEW");
-    console.log(id);
-    console.log(interview);
-    console.log(interview.interview);
-
-    // useEffect(() => {});
-    // setState({
-    //   ...state,
-    //   appointments: { ...state.appointments, id: interview }
-    // });
-    // console.log(state);
-    // console.log(state.appointments);
-    // return;
-
     const appointments = { ...state.appointments, [id]: interview };
-    // const newState = { ...state, appointments: appointments };
-    // setState(newState);
-    // console.log("NEW", newState);
-    // console.log(state);
 
-    return new Promise((resolve, reject) => {
-      console.log("ENTERING NEW ERA");
-      Axios.put(`http://localhost:3001/api/appointments/${id}`, interview)
-        .then(res => {
-          setState({ ...state, appointments: appointments });
-          console.log("OKOTOWARI SHIMASU");
-          console.log(state);
-          return res;
-        })
-        .catch(err => {
-          console.log("bad resposne");
+    return Axios.put(`http://localhost:3001/api/appointments/${id}`, interview)
+      .then(res => {
+        setState({ ...state, appointments: appointments });
+        return res;
+      })
+      .then(res => {
+        return res;
+      });
+  };
+
+  const deleteInterview = function(id, time) {
+    const emptyAppointment = {
+      id: id,
+      time: time,
+      interview: null
+    };
+
+    // Axios.delete(`http://localhost:3001/api/appointments/${id}`)
+
+    return Axios.delete(`http://localhost:3001/api/appointments/${id}`)
+      .then(res => {
+        setState({
+          ...state,
+          appointments: { ...state.appointments, [id]: emptyAppointment }
         });
-    });
-
-    // return new Promise((resolve, reject) => {
-    //   Axios.put(`http://localhost:3001/api/appointments/${id}`)
-    //     .then(res => {
-    //       setState({ ...state, appointments: appointments });
-    //       resolve()
-    //     })
-    //     .catch(err => {
-    //       console.log("Failed to update API: ", err);
-    //     });
-    // });
-    // .then(res => {
-    //   setState({ ...state, appointments: appointments });
-    //   resolve(res);
-    // })
-    // .catch(err => {
-    //   console.log("Failed to update API: ", err);
-    // });
+        return res;
+      })
+      .then(res => {
+        console.log("THIS ONE SHOULD BE UPDATED", state);
+        return res;
+      });
   };
 
   /////////////////////////////////////////
@@ -169,15 +151,16 @@ export default function Application(props) {
         // state={state}
         interviewers={interviewers}
         bookInterview={bookInterview}
+        deleteInterview={deleteInterview}
         state={state}
-        getNextId={() => {
-          console.log("heelo");
-          let id = 1;
-          while (Object.keys(state.appointments).includes(String(id))) {
-            id++;
-          }
-          return id;
-        }}
+        // getNextId={() => {
+        //   console.log("heelo");
+        //   let id = 1;
+        //   while (Object.keys(state.appointments).includes(String(id))) {
+        //     id++;
+        //   }
+        //   return id;
+        // }}
       />
     );
   });
@@ -195,9 +178,7 @@ export default function Application(props) {
           days={state.days}
           day={state.day}
           setDay={day => {
-            console.log("day is changing?", day);
             setState({ ...state, day: day });
-            console.log(state);
           }}
         />
         <nav className="sidebar__menu" />
