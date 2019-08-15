@@ -15,7 +15,7 @@ const useApplicationData = function() {
 
   /////////////////////////////////////////////////////////////////////
   const defaultState = {
-    trigger: false,
+    trigger: true,
     day: "Monday",
     days: [],
     appointments: {},
@@ -65,20 +65,22 @@ const useApplicationData = function() {
   /////////////////////////////////////////////////////////////////////
 
   useEffect(() => {
-    Promise.all([
-      Axios.get(`http://localhost:3001/api/days`),
-      Axios.get(`http://localhost:3001/api/appointments`),
-      Axios.get(`http://localhost:3001/api/interviewers`)
-    ])
-      .then(allRes => {
-        dispatch({
-          type: SET_APPLICATION_DATA,
-          days: allRes[0].data,
-          appointments: allRes[1].data,
-          interviewers: allRes[2].data
-        });
-      })
-      .then(() => {});
+    if (state.trigger) {
+      Promise.all([
+        Axios.get(`http://localhost:3001/api/days`),
+        Axios.get(`http://localhost:3001/api/appointments`),
+        Axios.get(`http://localhost:3001/api/interviewers`)
+      ])
+        .then(allRes => {
+          dispatch({
+            type: SET_APPLICATION_DATA,
+            days: allRes[0].data,
+            appointments: allRes[1].data,
+            interviewers: allRes[2].data
+          });
+        })
+        .then(() => {});
+    }
   }, [state.trigger]);
 
   ////////////////////////////////////////////////////////////////////
