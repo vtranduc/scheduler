@@ -9,9 +9,7 @@ import Axios from "axios";
 const useApplicationData = function() {
   const connection = new WebSocket("ws://localhost:3001");
 
-  connection.onmessage = msg => {
-    console.log("has received something", JSON.parse(msg.data));
-    const newData = JSON.parse(msg.data);
+  connection.onmessage = () => {
     dispatch({ type: RELOAD_API });
   };
 
@@ -99,7 +97,6 @@ const useApplicationData = function() {
 
   ////////////////////////////////////////////////////////////////////
   const cancelInterview = function(id, time) {
-    console.log("CANCELING");
     const emptyAppointment = {
       id: id,
       time: time,
