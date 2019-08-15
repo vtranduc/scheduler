@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "components/Appointment/styles.scss";
 import Header from "components/Appointment/header";
 import Empty from "components/Appointment/Empty";
@@ -23,10 +23,17 @@ const ERROR_DELETE = "ERROR_DELETE";
 ///////////////////////////////////////////////////////
 
 export default function Appointment(props) {
+  useEffect(() => {
+    if (props.interview) {
+      modeTracker.transition(SHOW);
+    } else {
+      modeTracker.transition(EMPTY);
+    }
+  }, [props.trigger]);
+
   const modeTracker = useVisualMode(props.interview ? SHOW : EMPTY);
   const save = function(name, interviewer, time) {
     if (name === "" || !interviewer) {
-      console.log("invalid input");
       return;
     }
     const interview = { student: name, interviewer: interviewer };
@@ -69,7 +76,7 @@ export default function Appointment(props) {
           }}
         />
       )}
-      {modeTracker.mode === SHOW && (
+      {modeTracker.mode === SHOW && props.interview && (
         <Show
           student={props.interview.student}
           interviewer={props.interview.interviewer}

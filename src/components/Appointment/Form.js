@@ -21,6 +21,10 @@ export default function Form(props) {
           />
         </form>
         <InterviewerList
+          // value={"sfadsfasd"}
+          // onChange={() => {
+          //   console.log("fdas");
+          // }}
           interviewers={props.interviewers}
           interviewer={interviewer}
           setInterviewerFun={setInterviewer}

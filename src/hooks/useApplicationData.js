@@ -7,8 +7,17 @@ import Axios from "axios";
 // The cancelInterview action makes an HTTP request and updates the local state.
 
 const useApplicationData = function() {
+  const connection = new WebSocket("ws://localhost:3001");
+
+  connection.onmessage = msg => {
+    console.log("has received something", JSON.parse(msg.data));
+    const newData = JSON.parse(msg.data);
+    dispatch({ type: RELOAD_API });
+  };
+
   /////////////////////////////////////////////////////////////////////
   const defaultState = {
+    trigger: false,
     day: "Monday",
     days: [],
     appointments: {},
@@ -19,7 +28,7 @@ const useApplicationData = function() {
   const SET_DAY = "SET_DAY";
   const SET_APPLICATION_DATA = "SET_APPLICATION_DATA";
   const SET_INTERVIEW = "SET_INTERVIEW";
-  const SET_SPOTS = "SET_SPOTS";
+  const RELOAD_API = "RELOAD_API";
 
   function reducer(state, action) {
     switch (action.type) {
@@ -28,6 +37,7 @@ const useApplicationData = function() {
       case SET_APPLICATION_DATA:
         return {
           ...state,
+          trigger: false,
           appointments: action.appointments,
           interviewers: action.interviewers,
           days: action.days
@@ -35,13 +45,15 @@ const useApplicationData = function() {
       case SET_INTERVIEW: {
         return {
           ...state,
+          trigger: true,
           appointments: action.appointments
         };
       }
-      case SET_SPOTS: {
-        console.log("Setting spots");
-        console.log(action.remainingSpots);
-        return { ...state };
+      case RELOAD_API: {
+        return {
+          ...state,
+          trigger: true
+        };
       }
       default:
         throw new Error(
@@ -59,15 +71,17 @@ const useApplicationData = function() {
       Axios.get(`http://localhost:3001/api/days`),
       Axios.get(`http://localhost:3001/api/appointments`),
       Axios.get(`http://localhost:3001/api/interviewers`)
-    ]).then(allRes => {
-      dispatch({
-        type: SET_APPLICATION_DATA,
-        days: allRes[0].data,
-        appointments: allRes[1].data,
-        interviewers: allRes[2].data
-      });
-    });
-  }, [state]);
+    ])
+      .then(allRes => {
+        dispatch({
+          type: SET_APPLICATION_DATA,
+          days: allRes[0].data,
+          appointments: allRes[1].data,
+          interviewers: allRes[2].data
+        });
+      })
+      .then(() => {});
+  }, [state.trigger]);
 
   ////////////////////////////////////////////////////////////////////
   const bookInterview = function(id, interview) {
@@ -85,6 +99,7 @@ const useApplicationData = function() {
 
   ////////////////////////////////////////////////////////////////////
   const cancelInterview = function(id, time) {
+    console.log("CANCELING");
     const emptyAppointment = {
       id: id,
       time: time,

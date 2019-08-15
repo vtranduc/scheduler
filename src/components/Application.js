@@ -28,12 +28,12 @@ export default function Application(props) {
       <Appointment
         key={appointment.id}
         id={appointment.id}
+        trigger={state.trigger}
         time={appointment.time}
         interview={interview}
         interviewers={interviewers}
         bookInterview={bookInterview}
         cancelInterview={cancelInterview}
-        state={state}
       />
     );
   });
